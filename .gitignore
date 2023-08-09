@@ -1,5 +1,5 @@
 **/**.nii.gz
-01.func_cirrect.sh
+01.func_correct.sh
 04.motion_realign.sh
 full_preproc.sh
 run_pipeline.sh
