@@ -23,7 +23,8 @@ source_T1= sorted([os.path.join(root, x) for root,dirs,files in os.walk(bids_dir
 print(source_T1)
 #making output file name
 output_mask= [niifti.replace("uniclean_T1w.nii.gz", "whead_mask.nii.gz") for niifti in source_T1]
-
+print("Calculating whole head mask")
 for i in range(len(source_T1)):
     os.system("3dcalc" + " -a " + source_T1[i] + " -expr 'step(a-60)' " + " -prefix " + output_mask[i])
     os.system("3dmask_tool" + " -fill_holes -dilate_inputs " + " +" + dilate +" -" + dilate+ " -input "  + output_mask[i] + " -prefix " + output_mask[i] + " -overwrite" )
+
