@@ -39,7 +39,6 @@ output_filerealign=[x.split("/")[-1] for x in source_sbref]
 file_len=[len(x) for x in output_filerealign]
 output_filerealign=[x.replace(".nii.gz","") for x in output_filerealign]
 # checking if output directory exist
-
 filenames=[ directory.partition("anat/")[0]+output_dir
            for directory in source_sbref]
 for directory in filenames:
