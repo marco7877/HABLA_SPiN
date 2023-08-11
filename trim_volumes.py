@@ -24,9 +24,9 @@ parser=argparse.ArgumentParser(
         description="Creates a whole head mask from T1 uni-clean")
 parser.add_argument("--echoes", default=None, type=int,
                     help="Number of echoes")
-parser.add_arguments("--drop_vol", default=10, type=int,
+parser.add_argument("--drop_vol", default=10, type=int,
                      help="First volumes to drop")
-parser.add_arguments("--drop_noise", default=None, type=int,
+parser.add_argument("--drop_noise", default=None, type=int,
                      help="Last noise volumes to drop")
 parser.add_argument("--bids_dir", default=None, type=str,
                     help="Full path to the BIDS directory ")
