@@ -36,9 +36,9 @@ parser.add_argument("--output_dir",default="func_preproc/", type =str,
                         -anat
                         -func
                         -func_preproc""")
-parser.add_argument("--bold_phase_ext", default="_part-phase_bold.nii.gz", type=str,
+parser.add_argument("--bold_phase_ext", default="_part-phase_bold", type=str,
                     help="bold_phase name extention after **echo-{n} without .nii.gz")                        
-parser.add_argument("--bold_ext", default="_part-mag_bold.nii.gz", type=str,
+parser.add_argument("--bold_ext", default="_part-mag_bold", type=str,
                     help="bold name extention after **echo-{n} without .nii.gz")
 args = parser.parse_args()
 echoes=args.echoes
@@ -77,7 +77,7 @@ for i in range(len(source_bold)):
     volumes=int(check_output("3dinfo -nt "+ source_bold[i]+"1"+bold_ext+".nii.gz", shell=True))
     volumes=volumes-drop_noise-1#AFNI index starts in 0
     volumes="["+str(drop_vol)+".."+str(volumes-drop_noise)+"]'"
-    for echo in range(1,echoes+1):
+    for echo in range(1,echoes+1):#echoes index start in 1
         print(f"trimming" +source_bold[i]+str(echo)+bold_ext+".nii.gz")
         os.system("3dcalc -a '"+source_bold[i]+str(echo)+bold_ext+".nii.gz"+volumes+
                   " -expr 'a' -prefix "+output_bold[i]+str(echo)+bold_ext+
