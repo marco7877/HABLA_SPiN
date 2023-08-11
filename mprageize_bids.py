@@ -47,6 +47,15 @@ if len(cleaned_images) != len(rename_cleaned_images):
 if len(uni_jsons) != len(cleaned_jsons):
     raise ValueError(f"Something went wrong, there are an unequal number of old ({len(uni_jsons)}) and new ({len(cleaned_jsons)}) json filenames")
 
+####### Output names/dir ######################################################
+# Check if output directory exists
+dir_names=[ directory.partition("anat/")[0]+"anat_preproc/"
+           for directory in rename_cleaned_images]
+for directory in dir_names:
+    if not os.path.exists(directory):
+        os.mkdir(directory)
+del dir_names
+
 for i in range(len(cleaned_images)):
     os.rename(cleaned_images[i],rename_cleaned_images[i])
     os.system(f"cp {uni_jsons[i]} {cleaned_jsons[i]}")
