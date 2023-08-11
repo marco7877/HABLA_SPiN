@@ -55,6 +55,9 @@ for directory in dir_names:
     if not os.path.exists(directory):
         os.mkdir(directory)
 del dir_names
+rename_cleaned_images= [niifti.replace("anat/", "anat_preproc/")
+              for niifti in rename_cleaned_images]
+
 
 for i in range(len(cleaned_images)):
     os.rename(cleaned_images[i],rename_cleaned_images[i])
