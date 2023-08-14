@@ -13,7 +13,7 @@ Last volumes are removed because we acquired phase
 '''
 ####### DEBUGG
 #bold_phase_ext="_part-phase_bold"
-#bold_ext="_bold"
+#bold_ext="_part-phase_bold"
 #echoes=4
 #bids_dir="/bcbl/home/public/MarcoMotion/Habla_restingState/"
 #output_dir="func_preproc/"
@@ -76,7 +76,7 @@ del dir_names
 for i in range(len(source_bold)):
     volumes=int(check_output("3dinfo -nt "+ source_bold[i]+"1"+bold_ext+".nii.gz", shell=True))
     volumes=volumes-drop_noise-1#AFNI index starts in 0
-    volumes="["+str(drop_vol)+".."+str(volumes-drop_noise)+"]'"
+    volumes="'["+str(drop_vol)+".."+str(volumes-drop_noise)+"]'"
     for echo in range(1,echoes+1):#echoes index start in 1
         print(f"trimming" +source_bold[i]+str(echo)+bold_ext+".nii.gz")
         os.system("3dcalc -a '"+source_bold[i]+str(echo)+bold_ext+".nii.gz"+volumes+
