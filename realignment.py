@@ -28,13 +28,14 @@ parser.add_argument("--output_dir",default="func_preproc/", type =str,
 args = parser.parse_args()
 bids_dir=args.bids_dir
 output_dir=args.output_dir
-#bids_dir= "/bcbl/home/public/MarcoMotion/Habla_restingState"#to debbug
+#bids_dir= "/bcbl/home/public/MarcoMotion/Habla_debbug"#to debbug
 echoes=args.parse_args()
 #echoes=4#to debbug
 # Here we could have a condition to check if the script has already been run and the files are there.
 # Im skipping this for now
 #reading target files
 ####### Reading files #########################################################
+# TODO: change echo-1_sbref.nii.gz to echo-1_part-mag_sbref.nii.gz
 source_sbref= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(bids_dir) 
                       for x in files if x.endswith("echo-1_sbref.nii.gz")])
@@ -65,7 +66,7 @@ realign_ref= sorted([os.path.join(root, x)
 filenames_out=[x.replace("1_sbref.nii.gz","") and x.replace("anat/","func_preproc")
                for x in source_sbref]
 # TODO: erase below line when rec-magnitude and rec-phase added in all niifti files
-filenames_out=[x.replace("_rec-magnitude","") for x in filenames_out]
+#filenames_out=[x.replace("_rec-magnitude","") for x in filenames_out]
 
 for i in range(len(source_sbref)):
     target_dir=source_sbref[i][0:-file_len[i]]
