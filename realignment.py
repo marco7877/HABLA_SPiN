@@ -56,7 +56,6 @@ filt_pattern=args.filt_pattern
 # Im skipping this for now
 #reading target files
 ####### Reading files #########################################################
-# TODO: change echo-1_sbref.nii.gz to echo-1_part-mag_sbref.nii.gz
 # TODO: add a condition where if sbref is not provided. Motion correction
 # is computed from mean voxel activation from echo 1 nold.nii.gz image
 source_sbref= sorted([os.path.join(root, x) 
@@ -131,8 +130,6 @@ realign_ref= sorted([os.path.join(root, x)
 if filt_pattern != None:
     source_sbref=sorted([directory for directory in realign_ref 
                   if filt_pattern in directory])
-# TODO: erase below line when rec-magnitude and rec-phase added in all niifti files
-#filenames_out=[x.replace("_rec-magnitude","") for x in filenames_out]
 for i in range(len(source_sbref)):
     for echo in range(echoes):#indentation starts in 0
         tmp_filename=output_filerealign[i]+str(echo+1)
