@@ -13,7 +13,7 @@ Note: You should have installed/loaded AFNI & fsl in order for this code to work
 #bold_phase_ext="_part-phase_bold"
 #bold_ext="_part-mag_bold"
 #echoes=4
-#bids_dir="/bcbl/home/public/MarcoMotion/Habla_debbug/"
+#bids_dir="/bcbl/home/public/MarcoMotion/Habla_restingState/"
 #output_dir="func_preproc/"
 #drop_vol=10
 #drop_noise=3
@@ -38,12 +38,20 @@ parser.add_argument("--bold_phase_ext",
                     help="bold_phase name extention after **echo-{n} without .nii.gz")                        
 parser.add_argument("--bold_mag_ext", default="_part-mag_bold", type=str,
                     help="bold name extention after **echo-{n} without .nii.gz")
+parser.add_argument("--filt_pattern", default=None, type=str,
+                    help="""The string pattern to identify specific files:
+                        This is useful to parallelize subjects, e.g.:
+                        --filt_pattern 001
+                        or to parallelize tasks, e.g. :
+                        --filt_pattern task-breathhold
+                        """)
 args = parser.parse_args()
 bids_dir=args.bids_dir
 output_dir=args.output_dir
 echoes=args.echoes
 bold_phase_ext=args.bold_phase_ext
 bold_ext=args.bold_mag_ext
+filt_pattern=args.filt_pattern
 # Here we could have a condition to check if the script has already been run and the files are there.
 # Im skipping this for now
 #reading target files
@@ -54,6 +62,10 @@ bold_ext=args.bold_mag_ext
 source_sbref= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(bids_dir) 
                       for x in files if x.endswith("echo-1_part-mag_sbref.nii.gz")])
+## filter condition
+if filt_pattern != None:
+    source_sbref=sorted([directory for directory in source_sbref 
+                  if filt_pattern in directory])
 ####### Output names/dir ######################################################
 output_filerealign=[directory.partition("echo-")[0]+"echo-"
            for directory in source_sbref]
@@ -115,6 +127,10 @@ print("Realigning remaining echoes ")
 realign_ref= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(bids_dir) 
                       for x in files if x.endswith("_mcf.aff12.1D")])
+## filter condition
+if filt_pattern != None:
+    source_sbref=sorted([directory for directory in realign_ref 
+                  if filt_pattern in directory])
 # TODO: erase below line when rec-magnitude and rec-phase added in all niifti files
 #filenames_out=[x.replace("_rec-magnitude","") for x in filenames_out]
 for i in range(len(source_sbref)):
