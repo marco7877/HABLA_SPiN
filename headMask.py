@@ -22,16 +22,26 @@ parser.add_argument("--output_dir",default="func_preproc/", type =str,
                         -anat
                         -func
                         -func_preproc""")
+parser.add_argument("--filt_pattern", default=None, type=str,
+                    help="""The string pattern to identify specific files:
+                        This is useful to parallelize subjects, e.g.:
+                        --filt_pattern 001
+                        or to parallelize tasks, e.g. :
+                        --filt_pattern task-breathhold
+                        """)
 args = parser.parse_args()
 bids_dir=args.bids_dir
 dilate=str(args.dilate)
 output_dir=args.output_dir
+filt_pattern=args.filt_pattern
 # Here we could have a condition to check if the script has already been run and the files are there.
 # Im skipping this for now
 ####### Reading files #########################################################
 source_T1= sorted([os.path.join(root, x) for root,dirs,files in os.walk(bids_dir) 
                    for x in files if x.endswith("uniclean_T1w.nii.gz")])
-print(source_T1)
+if filt_pattern != None:
+    source_T1=sorted([directory for directory in source_T1
+                  if filt_pattern in directory])
 ####### Output names/dir ######################################################
 output_mask= [niifti.replace("uniclean_T1w.nii.gz", "whead_mask.nii.gz") and
               niifti.replace("anat/", output_dir)
