@@ -37,13 +37,21 @@ parser.add_argument("--despike", default=False,type=bool,
 parser.add_argument("--sliceTimming", default=False,type=bool,
                     help="""Slice timme data? Default is False
                     WARNING: 
-                        THIS FEATURE IS IN DEPLOYMENT. IT DOESN'T NOT WORK YET""")                        
+                        THIS FEATURE IS IN DEPLOYMENT. IT DOESN'T WORK YET""")
+parser.add_argument("--filt_pattern", default=None, type=str,
+                    help="""The string pattern to identify specific files:
+                        This is useful to parallelize subjects, e.g.:
+                        --filt_pattern 001
+                        or to parallelize tasks, e.g. :
+                        --filt_pattern task-breathhold
+                        """)
 args = parser.parse_args()
 bids_dir=args.bids_dir
 dilate=str(args.dilate)
 output_dir=args.output_dir
 despike=args.despike
 sliceTimming=args.sliceTimming
+filt_pattern=args.filt_pattern
 # Here we could have a condition to check if the script has already been run and the files are there.
 # Im skipping this for now
 ####### Reading files #########################################################
@@ -51,6 +59,10 @@ sliceTimming=args.sliceTimming
 source_sbref= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(bids_dir) 
                       for x in files if x.endswith("echo-1_part-mag_sbref.nii.gz")])
+## filter condition
+if filt_pattern != None:
+    source_sbref=sorted([directory for directory in source_sbref 
+                  if filt_pattern in directory])
 tcount_bold= [ niifti.replace("sbref","bold") for niifti in source_sbref]
 tcount_bold= [ niifti.replace(".nii.gz","") for niifti in tcount_bold]
 tcount_bold= [ niifti.replace("func",output_dir)for niifti in tcount_bold]
