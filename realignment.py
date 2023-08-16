@@ -128,7 +128,7 @@ realign_ref= sorted([os.path.join(root, x)
                       for x in files if x.endswith("_mcf.aff12.1D")])
 ## filter condition
 if filt_pattern != None:
-    source_sbref=sorted([directory for directory in realign_ref 
+    realign_ref=sorted([directory for directory in realign_ref 
                   if filt_pattern in directory])
 for i in range(len(source_sbref)):
     for echo in range(echoes):#indentation starts in 0
