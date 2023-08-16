@@ -55,7 +55,6 @@ filt_pattern=args.filt_pattern
 # Here we could have a condition to check if the script has already been run and the files are there.
 # Im skipping this for now
 ####### Reading files #########################################################
-# TODO: change echo-1_sbref.nii.gz to echo-1_part-mag_sbref.nii.gz
 source_sbref= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(bids_dir) 
                       for x in files if x.endswith("echo-1_part-mag_sbref.nii.gz")])
