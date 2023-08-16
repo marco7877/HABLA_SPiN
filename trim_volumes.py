@@ -63,7 +63,7 @@ source_bold= sorted([os.path.join(root, x)
                       for x in files if x.endswith("bold.nii.gz")])
 ## filter condition
 if filt_pattern != None:
-    source_sbref=sorted([directory for directory in source_bold 
+    source_bold=sorted([directory for directory in source_bold 
                   if filt_pattern in directory])
 # TODO: check if lenght bold magnitude and bold phase are the same
 # Getting unique pattern
@@ -80,7 +80,6 @@ for directory in dir_names:
         os.mkdir(directory)
 del dir_names
 ####### Trimm files ###########################################################
-
 for i in range(len(source_bold)):
     volumes=int(check_output("3dinfo -nt "+ source_bold[i]+"1"+bold_ext+".nii.gz", shell=True))
     volumes=volumes-drop_noise-1#AFNI index starts in 0
