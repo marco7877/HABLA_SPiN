@@ -40,6 +40,13 @@ parser.add_argument("--bold_phase_ext", default="_part-phase_bold", type=str,
                     help="bold_phase name extention after **echo-{n} without .nii.gz")                        
 parser.add_argument("--bold_ext", default="_part-mag_bold", type=str,
                     help="bold name extention after **echo-{n} without .nii.gz")
+parser.add_argument("--filt_pattern", default=None, type=str,
+                    help="""The string pattern to identify specific files:
+                        This is useful to parallelize subjects, e.g.:
+                        --filt_pattern 001
+                        or to parallelize tasks, e.g. :
+                        --filt_pattern task-breathhold
+                        """)
 args = parser.parse_args()
 echoes=args.echoes
 bids_dir=args.bids_dir
@@ -48,19 +55,20 @@ drop_vol=args.drop_vol
 drop_noise=args.drop_noise
 bold_phase_ext=args.bold_phase_ext
 bold_ext=args.bold_ext
+filt_pattern=args.filt_pattern
 ####### Find files ############################################################
 # Trimming both magnitude and phase niiftis
 source_bold= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(bids_dir) 
                       for x in files if x.endswith("bold.nii.gz")])
-
+## filter condition
+if filt_pattern != None:
+    source_sbref=sorted([directory for directory in source_bold 
+                  if filt_pattern in directory])
 # TODO: check if lenght bold magnitude and bold phase are the same
-
 # Getting unique pattern
 source_bold=sorted(list(set([directory.partition("echo-")[0]+"echo-"
            for directory in source_bold])))
-
-
 ####### Output names/dir ######################################################
 output_bold= [directory.replace("func/", output_dir)
               for directory in source_bold]
