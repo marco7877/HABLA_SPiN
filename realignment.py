@@ -95,13 +95,13 @@ for i in range(len(source_sbref)):
               output_filerealign[i] + "1"+bold_ext+
               "_dvars_post --dvars --nomoco")
     os.system("fsl_motion_outliers -i "
-              +output_filerealign[i] + "1"+bold_ext+bold_ext+"_dsd.nii.gz -o "+
+              +output_filerealign[i] + "1"+bold_ext+"_dsd.nii.gz -o "+
               output_filerealign[i] + "1"+bold_ext+"_mcf_dvars_confounds -s "+
               output_filerealign[i] + "1"+bold_ext+"_dvars_pre.par -p "+
               output_filerealign[i] + "1"+bold_ext+
               "_dvars_pre --dvars --nomoco")
     os.system("fsl_motion_outliers -i "
-              +output_filerealign[i] + "1"+bold_ext+bold_ext+"_dsd.nii.gz -o "+
+              +output_filerealign[i] + "1"+bold_ext+"_dsd.nii.gz -o "+
               output_filerealign[i] + "1"+bold_ext+"_mcf_fd_confounds -s "+
               output_filerealign[i] + "1"+bold_ext+"_fd.par -p "+
               output_filerealign[i] + "1"+bold_ext+
