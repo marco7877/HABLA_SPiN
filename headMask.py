@@ -55,7 +55,7 @@ del filenames
 ####### Head mask creation ####################################################
 print("Calculating whole head mask")
 for i in range(len(source_T1)):
-    os.system("3dcalc" + " -a " + source_T1[i] + " -expr 'step(a-60)' " +
+    os.system("3dcalc" + " -a " + source_T1[i] + " -expr 'step(a-3)' " +
               " -prefix " + output_mask[i])
     os.system("3dmask_tool" + " -fill_holes -dilate_inputs " + " +" +
               dilate +" -" + dilate+ " -input "  + output_mask[i] +
