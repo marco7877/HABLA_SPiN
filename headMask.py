@@ -52,7 +52,7 @@ if filt_pattern != None:
     source_T1=sorted([directory for directory in source_T1
                   if filt_pattern in directory])
 ####### Output names/dir ######################################################
-output_mask= [niifti.replace("uniclean_T1w.nii.gz", "whead_mask.nii.gz")
+output_mask= [niifti.replace("uniclean_T1w.nii.gz", "whead_T1mask.nii.gz")
               for niifti in source_T1]
 output_mask= [niifti.replace("anat/", output_dir)for niifti in output_mask]
 # checking if output directory exist
