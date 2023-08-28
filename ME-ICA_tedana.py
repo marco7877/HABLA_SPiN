@@ -48,6 +48,9 @@ parser.add_argument("--filt_pattern", default=None, type=str,
                         or to parallelize tasks, e.g. :
                         --filt_pattern task-breathhold
                         """)
+parser.add_argument("--nordic", default=False, type=bool,
+                    help="Are files to be realigned post-NORDIC? Default, False
+                        ")
 args = parser.parse_args()
 echoes=args.echoes
 TE=args.TE
@@ -56,13 +59,18 @@ output_dir=args.output_dir
 preproc_bold_ext=args.preproc_bold_ext
 mask_ext=args.mask_ext
 filt_pattern=args.filt_pattern
+nordic=args.nordic
 ####### Find files ############################################################
 # TODO: check with Cesar if we have to change dsd to another extention as in 
 # Stephanos workflow
+if nordic == False:
+    nifti_ext=".nii.gz"
+else:
+    nifti_ext=".nii"
 source_bold= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(bids_dir) 
                       for x in files if x.endswith(preproc_bold_ext+
-                                                   ".nii.gz") 
+                                                   nifti_ext) 
                        if "part-mag" in x if "echo-1" in x])
 ## filter condition
 if filt_pattern != None:
