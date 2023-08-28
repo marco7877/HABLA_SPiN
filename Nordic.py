@@ -75,13 +75,16 @@ out_bold= [directory.replace("dsd.nii.gz","nordic")
            for directory in out_bold]
 out_dir=sorted([directory.partition("func_preproc/")[0]+"func_preproc/"
            for directory in source_bold])
+nordic=matlab_nordic.split("/")[-1]
+nordic_directory=nordic[0:(len(nordic)*-1)]
+os.system("sed -i 's~code_directory~"+nordic_directory+"~' "+matlab_nordic)
 for i in range(len(source_bold)):
     os.system("sed -i 's~bold_mag~"+source_bold[i]+"~' "+matlab_nordic)
     os.system("sed -i 's~bold_phase~"+source_phase[i]+"~' "+matlab_nordic)
     os.system("sed -i 's~target~"+out_dir[i]+"~' "+matlab_nordic)
     os.system("sed -i 's~fn_out~"+out_bold[i]+"~' "+matlab_nordic)
-    print("matlab -batch " + '"' +"run('nordic');exit"+'"')
-    os.system("matlab -batch " + '"' +"run('nordic');exit"+'"')
+    print("matlab -batch " + '"' +"run('"+nordic+"');exit"+'"')
+    os.system("matlab -batch " + '"' +"run('"+nordic+"');exit"+'"')
     os.system("sed -i 's~"+source_bold[i]+"~bold_mag~' "+matlab_nordic)
     os.system("sed -i 's~"+source_phase[i]+"~bold_phase~' "+matlab_nordic)
     os.system("sed -i  's~"+out_bold[i]+"~fn_out~' "+matlab_nordic)
