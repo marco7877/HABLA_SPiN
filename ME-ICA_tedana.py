@@ -49,8 +49,7 @@ parser.add_argument("--filt_pattern", default=None, type=str,
                         --filt_pattern task-breathhold
                         """)
 parser.add_argument("--nordic", default=False, type=bool,
-                    help="Are files to be realigned post-NORDIC? Default, False
-                        ")
+                    help="Are files to be realigned post-NORDIC? Default, False")
 args = parser.parse_args()
 echoes=args.echoes
 TE=args.TE
@@ -78,11 +77,12 @@ if filt_pattern != None:
                   if filt_pattern in directory])
 files=[directory.partition("echo-1") for directory in source_bold]
 head,_,tail=zip(*files)
-bold_names=list(set([directory.partition("func_preproc/")[-1]
+preproc_directory=source_bold[0].split("/")[-2]
+bold_names=list(set([directory.partition(preproc_directory+"/")[-1]
                         for directory in source_bold]))
 #subjects=sorted(list(set([file.split("_")[0] for file in bold_names])))
 tasks=sorted(list(set([file.split("_")[2] for file in bold_names])))
-dir_names=list(set([directory.partition("func_preproc/")[0]+output_dir 
+dir_names=list(set([directory.partition(preproc_directory+"/")[0]+output_dir 
            for directory in source_bold]))
 source_mask=sorted([os.path.join(root,x)
                     for root,dirs,files in os.walk(bids_dir)
