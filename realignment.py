@@ -70,8 +70,16 @@ if filt_pattern != None:
     source_sbref=sorted([directory for directory in source_sbref 
                   if filt_pattern in directory])
 ####### Output names/dir ######################################################
+if nordic == False:
+    epi_ext="_dsd.nii.gz"
+else:
+    epi_ext="_nordic.nii"
+source_bold= sorted([os.path.join(root, x) 
+                      for root,dirs,files in os.walk(bids_dir) 
+                      for x in files if x.endswith("echo-1"+bold_ext+epi_ext)])
 output_filerealign=[directory.partition("echo-")[0]+"echo-"
-           for directory in source_sbref]
+           for directory in source_bold]
+filerealign=output_filerealign
 output_filerealign=[directory.replace("func/",output_dir) 
                     for directory in output_filerealign]
 # checking of output directory exists
@@ -81,11 +89,7 @@ for directory in filenames:
     if not os.path.exists(directory):
         os.mkdir(directory)
 del filenames
-if nordic == False:
-    epi_ext="_dsd.nii.gz"
-else:
-    epi_ext="_nordic.nii"
-####### Matrix motion correction from sbref echo n ############################
+###### Matrix motion correction from sbref echo n ############################
 # TODO: add a condition where if sbref is not provided. Motion correction
 # is computed from mean voxel activation from echo 1 nold.nii.gz image
 # command: 3dTstat -mean -prefix "${mref}" "${tmp}"/"${func_in}" -overwrite
@@ -95,7 +99,7 @@ for i in range(len(source_sbref)):
               " -1Dfile " + output_filerealign[i] + "1"+bold_ext+"_mcf.1D " +
               "-1Dmatrix_save "+ output_filerealign[i] + "1"+bold_ext+
               "_mcf.aff12.1D -prefix " +output_filerealign[i] +"1"+bold_ext+
-              "_mcf.nii.gz "+output_filerealign[i] + "1"+bold_ext+
+              "_mcf.nii.gz "+filerealign[i] + "1"+bold_ext+
               epi_ext)
     ## Demean motion parameters
     os.system("1d_tool.py -infile "+ 
@@ -120,7 +124,7 @@ for i in range(len(source_sbref)):
               output_filerealign[i] + "1"+bold_ext+
               "_dvars_pre --dvars --nomoco")
     os.system("fsl_motion_outliers -i "
-              +output_filerealign[i] + "1"+bold_ext+epi_ext+" -o "+
+              +filerealign[i] + "1"+bold_ext+epi_ext+" -o "+
               output_filerealign[i] + "1"+bold_ext+"_mcf_fd_confounds -s "+
               output_filerealign[i] + "1"+bold_ext+"_fd.par -p "+
               output_filerealign[i] + "1"+bold_ext+
@@ -145,6 +149,6 @@ for i in range(len(source_sbref)):
         os.system("3dAllineate -overwrite -base "+source_sbref[i]+
                   " -final cubic -1Dmatrix_apply "+ realign_ref[i]+
                   " -prefix "+ tmp_filename+bold_ext+"_mcf_al.nii.gz "+
-                  tmp_filename+bold_ext+epi_ext)
+                  filename+bold_ext+epi_ext)
         
         
