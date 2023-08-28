@@ -77,13 +77,14 @@ else:
 source_bold= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(bids_dir) 
                       for x in files if x.endswith("echo-1"+bold_ext+epi_ext)])
-output_filerealign=[directory.partition("echo-")[0]+"echo-"
+filerealign=[directory.partition("echo-")[0]+"echo-"
            for directory in source_bold]
-filerealign=output_filerealign
-output_filerealign=[directory.replace("func/",output_dir) 
-                    for directory in output_filerealign]
+bold_dir_source=filerealign[0].split("/")[-2]+"/"
+output_filerealign=[directory.replace(bold_dir_source,output_dir) 
+                    for directory in filerealign]
 # checking of output directory exists
-filenames=[ directory.partition("anat/")[0]+output_dir
+sbref_dir_source=source_sbref[0].split("/")[-2]+"/"
+filenames=[ directory.partition(sbref_dir_source)[0]+output_dir
            for directory in source_sbref]
 for directory in filenames:
     if not os.path.exists(directory):
@@ -149,6 +150,6 @@ for i in range(len(source_sbref)):
         os.system("3dAllineate -overwrite -base "+source_sbref[i]+
                   " -final cubic -1Dmatrix_apply "+ realign_ref[i]+
                   " -prefix "+ tmp_filename+bold_ext+"_mcf_al.nii.gz "+
-                  filename+bold_ext+epi_ext)
+                  tmp_filename+bold_ext+epi_ext)
         
         
