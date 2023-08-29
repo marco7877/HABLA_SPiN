@@ -33,7 +33,7 @@ parser.add_argument("--output_dir",default="ME-ICA/", type =str,
                         -anat
                         -func
                         -func_preproc""")
-parser.add_argument("--preproc_bold_ext", default="bold_dsd", type=str,
+parser.add_argument("--preproc_bold_ext", default="bold_mcf", type=str,
                     help="""bold preproc files name extention  without .nii.gz.
                     default is bold_dsd """)
 parser.add_argument("--mask_ext", default="brain_mask", type = str,
