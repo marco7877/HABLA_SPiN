@@ -14,9 +14,11 @@ Note: You should have installed/loaded AFNI & fsl in order for this code to work
 #bold_ext="_part-mag_bold"
 #echoes=4
 #bids_dir="/bcbl/home/public/MarcoMotion/Habla_restingState/"
-#output_dir="func_preproc/"
+#output_dir="func_preproc_nordic/"
 #drop_vol=10
 #drop_noise=3
+#nordic=True
+#filt_pattern=None
 ####### Arguments #############################################################
 parser=argparse.ArgumentParser(
         description="""Generate reference images for motion correction.
@@ -139,17 +141,18 @@ print("Realigning remaining echoes ")
 realign_ref= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(bids_dir) 
                       for x in files if x.endswith("_mcf.aff12.1D")])
-## filter condition
+realign_ref=sorted([x for x in realign_ref if output_dir in x])
 if filt_pattern != None:
     realign_ref=sorted([directory for directory in realign_ref 
                   if filt_pattern in directory])
 for i in range(len(source_sbref)):
     for echo in range(echoes):#indentation starts in 0
         tmp_filename=output_filerealign[i]+str(echo+1)
+        tmp_filerealign=filerealign[i]+str(echo+1)
         print(f"Motion realignment for {tmp_filename}")
         os.system("3dAllineate -overwrite -base "+source_sbref[i]+
                   " -final cubic -1Dmatrix_apply "+ realign_ref[i]+
                   " -prefix "+ tmp_filename+bold_ext+"_mcf_al.nii.gz "+
-                  tmp_filename+bold_ext+epi_ext)
+                  tmp_filerealign+bold_ext+epi_ext)
         
         
