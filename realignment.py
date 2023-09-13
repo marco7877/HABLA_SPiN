@@ -45,7 +45,7 @@ parser.add_argument("--filt_pattern", default=None, type=str,
                         This is useful to parallelize subjects, e.g.:
                         --filt_pattern 001
                         or to parallelize tasks, e.g. :
-                        --filt_pattern task-breathhold
+                        --filt_pattern task-breathhold #TODO agregar un ejemplo son sub_ses y task
                         """)
 parser.add_argument("--nordic", default=False, type=bool,
                     help="Are file to be realigned post-NORDIC? Default, False")
