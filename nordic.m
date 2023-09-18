@@ -1,5 +1,5 @@
 addpath(genpath("/bcbl/home/home_g-m/mflores/mytoolboxes/NORDIC_raw/"));
-cd 'code_directory';
+cd '/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/';
 ARG.temporal_phase=1;
 ARG.phase_filter_width=10;
 ARG.save_add_info=1;
