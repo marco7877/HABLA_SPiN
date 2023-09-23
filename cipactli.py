@@ -4,26 +4,31 @@ author: Marco Flores-Coronado
 """
 import os
 import argparse
+from subprocess import check_output
+from datetime import datetime
 '''
-Note: You should have installed/loaded AFNI & fsl in order for this code to work.
+Note: You should have installed/loaded AFNI for this to work. Moreover, you 
+need to have the HABLA_SPiN repo cloned so that you have acces to 
+realignment.py and ME-ICA_tedana.py as both are used internally here
+through os.system("something").
 
 '''
 # DEBUGG
-# bold_phase_ext="_parthase_bold"
-# bold_ext="_part-mag_bold"
-# echoes=4
-# bids_dir="/bcbl/home/public/MarcoMotion/Habla_restingState/"
-# output_dir="func_preproc/"
-# drop_vol=10
-# drop_noise=3
-# temporal_phase="1"
-# phase_filter="10"
-
+matlab_nordic="/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/nordic.m"
+echo1="/bcbl/home/public/MarcoMotion/Habla_restingState/sub-001/ses-1/func_preproc/sub-001_ses-1_task-HABLA1200_echo-1_part-mag_bold_dsd.nii.gz"
+output_dir="func_preproc_cipactli/"
+echoes=4
+output_dir="func_preproc_cipactli/"
+repo_directory="/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/"
 ####### Arguments #############################################################
 parser = argparse.ArgumentParser(
     description="""Cipactli pipeline to remove thermal noise""")
 parser.add_argument("--echo1", default=None, type=str,
                     help="Full path to echo 1. mag and phase should be stored")
+parser.add_argument("--source_sbref", default=None, type=str,
+                    help="""Sbref image to align epi volumes post nordic
+                    currently we only support aligning to a single sbref,
+                    but will be allowed to do so in the future""")
 parser.add_argument("--matlab_nordic", default=None, type=str,
                     help="directory where the matlab script is allocated")
 parser.add_argument("--output_dir", default="func_preproc/", type=str,
@@ -34,6 +39,12 @@ parser.add_argument("--output_dir", default="func_preproc/", type=str,
                         -func_preproc""")
 parser.add_argument("--echoes", default=None, type=int,
                     help="Number of echoes")
+parser.add_argument("--TE", default=None, type=str,
+                    help= "Time in ms for each echo")
+parser.add_argument("--repo_directory",default=None,type=str,
+                    help="""The complete direction where the 
+                    HABLA_SPiN repo is stored, e.g. :
+                        /bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/""")
 parser.add_argument("--filt_pattern", default=None, type=str,
                     help="""The string pattern to identify specific files:
                         This is useful to parallelize subjects, e.g.:
@@ -41,8 +52,8 @@ parser.add_argument("--filt_pattern", default=None, type=str,
                         or to parallelize tasks, e.g. :
                         --filt_pattern task-breathhold
                         """)
-parser.add_argument("--temporal_phase", default=1, type=str, help="""
-			Temporal phase for nifti_nordic script""")
+parser.add_argument("--mask", default=None, type=str,
+                    help="""Mask to run tedana, only the filename is needed""")
 parser.add_argument("-phase_filter", default=10, type=str, help="""
 			Temporal phase for nifti_nordic script""")
 args = parser.parse_args()
@@ -51,9 +62,11 @@ output_dir=args.output_dir
 matlab_nordic = args.matlab_nordic
 echo1 = args.echo1
 filt_pattern = args.filt_pattern
-temporal_phase = args.temporal_phase
 phase_filter = args.phase_filter
 echoes = args.echoes
+mask=args.mask
+TE = args.TE
+repo_directory=args.repo_directory
 # start
 parts = echo1.partition("echo-1")
 head,_,mag_tail = zip(parts)
@@ -61,10 +74,20 @@ head="".join(head)
 mag_tail="".join(mag_tail)
 phase_tail=mag_tail.replace("part-mag","part-phase")
 outhead=head.replace("func_preproc/",output_dir)
+out_name=outhead.partition(output_dir)
+directory_out,_,file_name=zip(out_name)
+file_name="".join(file_name)
+directory_cipactli="".join(directory_out ) + output_dir
 directory,_,_=outhead.partition(output_dir)
 if not os.path.exists(directory+output_dir):
     os.mkdir(directory+output_dir)
 #del directory
+# make simbolic link of mask 
+source_mask= sorted([os.path.join(root, x) 
+                      for root,dirs,files in os.walk(directory) 
+                      for x in files if mask in x])
+for i in range(len(source_mask)):
+    os.system("ln -s "+source_mask[i]+" "+directory+output_dir+mask)
 # Concatenating part-mag and part-phase echoes
 mag_terms=""
 phase_terms=""
@@ -72,19 +95,67 @@ for i in range(echoes):
     mag_terms+=head+"echo-"+str(i+1)+mag_tail+" "
     phase_terms+=head+"echo-"+str(i+1)+phase_tail+" "
 ## concatenating everything with AFNI
-os.system("3dZcat "+mag_terms+" -prefix "+outhead+"_echoes_part-mag_bold_dsd.nii.gz")
-os.system("3dZcat "+phase_terms+" -prefix "+outhead+"_echoes_part-phase_bold_dsd.nii.gz")
+print(f'Concatenating {echoes} echoes for nordic denoising')
+os.system("3dZcat "+mag_terms+" -prefix "+outhead+"echoes_part-mag_bold_dsd.nii.gz")
+os.system("3dZcat "+phase_terms+" -prefix "+outhead+"echoes_part-phase_bold_dsd.nii.gz")
+
+####### nordic ################################################################
 ## running nordic over concat niiftis
 nordic=matlab_nordic.split("/")[-1]
-nordic_directory=matlab_nordic[0:(len(nordic)*-1)]
+nordic_directory=nordic[0:(len(nordic)*-1)]
+# TODO: find a better way to call matlab, open to suggestions
+### do changes to nordic.m
 os.system("sed -i 's~code_directory~"+nordic_directory+"~' "+matlab_nordic)
-os.system("sed -i 's~bold_mag~"+outhead+"_echoes_part-mag_bold_dsd.nii.gz"+"~' "+matlab_nordic)
-os.system("sed -i 's~bold_phase~"+outhead+"_echoes_part-phase_bold_dsd.nii.gz"+"~' "+matlab_nordic)
+os.system("sed -i 's~bold_mag~"+outhead+"echoes_part-mag_bold_dsd.nii.gz"+"~' "+matlab_nordic)
+os.system("sed -i 's~bold_phase~"+outhead+"echoes_part-phase_bold_dsd.nii.gz"+"~' "+matlab_nordic)
 os.system("sed -i 's~target~"+directory+output_dir+"~' "+matlab_nordic)
-os.system("sed -i 's~fn_out~"+outhead+"_echoes_part-mag_bold_cipactli"+"~' "+matlab_nordic)
-print("matlab -batch " + '"' +"run('"+nordic+"');exit"+'"')
-os.system("matlab -batch " + '"' +"run('"+nordic+"');exit"+'"')
-os.system("sed -i 's~"+outhead+"_echoes_part-mag_bold_dsd.nii.gz"+"~bold_mag~' "+matlab_nordic)
-os.system("sed -i 's~"+outhead+"_echoes_part-phase_bold_dsd.nii.gz"+"~bold_phase~' "+matlab_nordic)
-os.system("sed -i  's~"+outhead+"_echoes_part-mag_bold_cipactli"+"~fn_out~' "+matlab_nordic)
+os.system("sed -i 's~fn_out~"+file_name+"echoes_part-mag_bold_cipactli"+"~' "+matlab_nordic)
+print("matlab -batch " + '"' +"run('"+matlab_nordic+"');exit"+'"')
+### run nordic.m and get time for log output
+run_time=datetime.now()
+time_string = run_time.strftime("%d-%m-%Y_%H-%M-%S")
+os.system("matlab -batch " + '"' +"run('"+matlab_nordic+"');exit"+'" > '+
+          outhead+"cipactli_nordic_"+time_string+".log")
+### revert change to nordic.m
+os.system("sed -i 's~"+outhead+"echoes_part-mag_bold_dsd.nii.gz"+"~bold_mag~' "+matlab_nordic)
+os.system("sed -i 's~"+outhead+"echoes_part-phase_bold_dsd.nii.gz"+"~bold_phase~' "+matlab_nordic)
+os.system("sed -i  's~"+file_name+"echoes_part-mag_bold_cipactli"+"~fn_out~' "+matlab_nordic)
 os.system("sed -i  's~"+directory+output_dir+"~target~' "+matlab_nordic)
+## slicing diferent echoes back with AFNI
+#TODO: find the correct name output for cipactli scripts
+z_cipactli=int(check_output("3dinfo -nk "+ outhead+"echoes_part-mag_bold_cipactli"+".nii", shell=True))
+z_raw=int(check_output("3dinfo -nk "+ echo1, shell=True))
+z_slices_cut=list(range(0,z_cipactli,z_raw))
+z_slices_cut.append(z_cipactli)
+print(f'Cutting apart {echoes} echoes after nordic denoising')
+for echo in range(echoes):
+    os.system("3dZcutup -prefix "+outhead+"echo-"+str(echo+1)+
+              "_part-mag_bold_cipactli_dsd.nii.gz -keep "+
+              str(z_slices_cut[echo]) +" "+ str(z_slices_cut[echo+1]-1)+" "+
+                                              outhead+"echoes_part-mag_bold_cipactli.nii -overwrite")
+print(f'Done sepparating echoes')
+print(f'Calculating geometrix matrix from {outhead+"echo-1_part-mag_bold_cipactli_dsd.nii.gz"}')
+geom_matrix=str(check_output("3dAttribute IJK_TO_DICOM_REAL "+ outhead+
+                             "echo-1_part-mag_bold_cipactli_dsd.nii.gz", shell=True))
+SCL = "n'b"+'\\'  
+for character in SCL:
+    geom_matrix = geom_matrix.replace(character, '')
+print("Aligning all achoes to the same grid matrix after Z")
+for i in range(1,echoes):
+    os.system("ATR=$(3dAttribute IJK_TO_DICOM_REAL "+ outhead+
+                             "echo-1_part-mag_bold_cipactli_dsd.nii.gz) && 3drefit -atrfloat IJK_TO_DICOM_REAL "+
+                             '"${ATR}"'+" "+outhead+"echo-"+str(i+1)+"_part-mag_bold_cipactli_dsd.nii.gz")
+####### realignment ###########################################################
+### create simbolic link and then use realignment.py
+head_sbref=head.replace("func_preproc/", "func/")
+ref_sbref=head_sbref+"echo-1_part-mag_sbref.nii.gz"
+os.system("ln -s "+ref_sbref+" "+outhead+"echo-1_part-mag_sbref.nii.gz")
+# using realignment.py
+realignment=repo_directory+"realignment.py"
+os.system("python "+ realignment+" --bids_dir "+directory_cipactli+" --echoes "+
+          str(echoes)+ " --output_dir "+output_dir+" --bold_mag_ext _part-mag_bold_cipactli")
+# using tedana
+tedana=repo_directory+"ME-ICA_tedana.py"
+os.system("python "+tedana+ " --bids_dir "+directory_cipactli+" --echoes "+
+          str(echoes)+" --TE "+'"'+TE+'"'+" --output_dir "+output_dir+
+          " --preproc_bold_ext bold_cipactli_mcf_al --mask_ext brain_mask")
