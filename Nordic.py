@@ -84,7 +84,7 @@ for i in range(len(source_bold)):
     os.system("sed -i 's~target~"+out_dir[i]+"~' "+matlab_nordic)
     os.system("sed -i 's~fn_out~"+out_bold[i]+"~' "+matlab_nordic)
     print("matlab -batch " + '"' +"run('"+nordic+"');exit"+'"')
-    os.system("matlab -batch " + '"' +"run('"+nordic+"');exit"+'"')
+    os.system("matlab -batch " + '"' +"run('"+matlab_nordic+"');exit"+'"')
     os.system("sed -i 's~"+source_bold[i]+"~bold_mag~' "+matlab_nordic)
     os.system("sed -i 's~"+source_phase[i]+"~bold_phase~' "+matlab_nordic)
     os.system("sed -i  's~"+out_bold[i]+"~fn_out~' "+matlab_nordic)
