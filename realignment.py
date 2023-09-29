@@ -106,6 +106,7 @@ for i in range(len(source_sbref)):
               epi_ext)
     ## Demean motion parameters
 #TODO make derivatives to work again. Problem with source files declaration
+# checar el código de stefano y la ayuda de fsl
     os.system("1d_tool.py -infile "+ 
               output_filerealign[i] + "1"+bold_ext+"_mcf.1D" +
               " -demean -write "+
