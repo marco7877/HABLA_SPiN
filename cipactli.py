@@ -14,12 +14,14 @@ through os.system("something").
 
 '''
 # DEBUGG
-matlab_nordic="/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/nordic.m"
-echo1="/bcbl/home/public/MarcoMotion/Habla_restingState/sub-001/ses-1/func_preproc/sub-001_ses-1_task-HABLA1200_echo-1_part-mag_bold_dsd.nii.gz"
-output_dir="func_preproc_cipactli/"
-echoes=4
-output_dir="func_preproc_cipactli/"
-repo_directory="/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/"
+#matlab_nordic="nordic.m"
+#echo1="/bcbl/home/public/MarcoMotion/Habla_restingState/sub-002/ses-1/func_preproc/sub-002_ses-1_task-HABLA1200_echo-1_part-mag_bold_dsd.nii.gz"
+#output_dir="func_preproc_cipactli/"
+#echoes=4
+#output_dir="func_preproc_cipactli/"
+#repo_directory="/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/"
+#mask="/bcbl/home/public/MarcoMotion/Habla_restingState/sub-002/ses-1/func_preproc/sub-002_ses-1_task-HABLA1200_echo-1_part-mag_brain_mask.nii.gz"
+#TE="11,28, 45, 61"
 ####### Arguments #############################################################
 parser = argparse.ArgumentParser(
     description="""Cipactli pipeline to remove thermal noise""")
@@ -29,9 +31,11 @@ parser.add_argument("--source_sbref", default=None, type=str,
                     help="""Sbref image to align epi volumes post nordic
                     currently we only support aligning to a single sbref,
                     but will be allowed to do so in the future""")
-parser.add_argument("--matlab_nordic", default=None, type=str,
-                    help="directory where the matlab script is allocated")
-parser.add_argument("--output_dir", default="func_preproc/", type=str,
+parser.add_argument("--matlab_nordic", default="nordic.m", type=str,
+                    help="""filename of the script to be run
+                    CAUTION: This works, but is not good practice. 
+                    SUggestions to avoid this """)
+parser.add_argument("--output_dir", default="func_preproc_cipactli/", type=str,
                     help="""Directory to store output at.
                     Default is func_preproc:
                         -anat
@@ -41,7 +45,7 @@ parser.add_argument("--echoes", default=None, type=int,
                     help="Number of echoes")
 parser.add_argument("--TE", default=None, type=str,
                     help= "Time in ms for each echo")
-parser.add_argument("--repo_directory",default=None,type=str,
+parser.add_argument("--repo_directory",default="/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/",type=str,
                     help="""The complete direction where the 
                     HABLA_SPiN repo is stored, e.g. :
                         /bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/""")
@@ -57,9 +61,8 @@ parser.add_argument("--mask", default=None, type=str,
 parser.add_argument("-phase_filter", default=10, type=str, help="""
 			Temporal phase for nifti_nordic script""")
 args = parser.parse_args()
-bids_dir = args.bids_dir
 output_dir=args.output_dir
-matlab_nordic = args.matlab_nordic
+matlab_nordic=args.matlab_nordic
 echo1 = args.echo1
 filt_pattern = args.filt_pattern
 phase_filter = args.phase_filter
@@ -71,41 +74,50 @@ repo_directory=args.repo_directory
 parts = echo1.partition("echo-1")
 head,_,mag_tail = zip(parts)
 head="".join(head)
+print(mag_tail)
 mag_tail="".join(mag_tail)
+print(mag_tail)
 phase_tail=mag_tail.replace("part-mag","part-phase")
 outhead=head.replace("func_preproc/",output_dir)
 out_name=outhead.partition(output_dir)
 directory_out,_,file_name=zip(out_name)
 file_name="".join(file_name)
 directory_cipactli="".join(directory_out ) + output_dir
+print("dir_cipactli ="+directory_cipactli+"|")
 directory,_,_=outhead.partition(output_dir)
-if not os.path.exists(directory+output_dir):
-    os.mkdir(directory+output_dir)
+if not os.path.exists(directory_cipactli):
+    os.mkdir(directory_cipactli)
 #del directory
+mask=mask.partition("func_preproc/")
+mask_dir,_,mask_filename=zip(mask)
+mask_file="".join(mask_filename)
 # make simbolic link of mask 
 source_mask= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(directory) 
-                      for x in files if mask in x])
+                      for x in files if mask_file in x])
 for i in range(len(source_mask)):
-    os.system("ln -s "+source_mask[i]+" "+directory+output_dir+mask)
+    os.system("ln -s "+source_mask[i]+" "+directory+output_dir+mask_file)
 # Concatenating part-mag and part-phase echoes
 mag_terms=""
 phase_terms=""
+
 for i in range(echoes):
     mag_terms+=head+"echo-"+str(i+1)+mag_tail+" "
     phase_terms+=head+"echo-"+str(i+1)+phase_tail+" "
 ## concatenating everything with AFNI
+print(mag_terms)
 print(f'Concatenating {echoes} echoes for nordic denoising')
 os.system("3dZcat "+mag_terms+" -prefix "+outhead+"echoes_part-mag_bold_dsd.nii.gz")
 os.system("3dZcat "+phase_terms+" -prefix "+outhead+"echoes_part-phase_bold_dsd.nii.gz")
 
 ####### nordic ################################################################
 ## running nordic over concat niiftis
-nordic=matlab_nordic.split("/")[-1]
-nordic_directory=nordic[0:(len(nordic)*-1)]
+#nordic=matlab_nordic.split("/")[-1]
+#nordic_directory=nordic[0:(len(nordic)*-1)]
+matlab_nordic=repo_directory+matlab_nordic
 # TODO: find a better way to call matlab, open to suggestions
 ### do changes to nordic.m
-os.system("sed -i 's~code_directory~"+nordic_directory+"~' "+matlab_nordic)
+os.system("sed -i 's~code_directory~"+repo_directory+"~' "+matlab_nordic)
 os.system("sed -i 's~bold_mag~"+outhead+"echoes_part-mag_bold_dsd.nii.gz"+"~' "+matlab_nordic)
 os.system("sed -i 's~bold_phase~"+outhead+"echoes_part-phase_bold_dsd.nii.gz"+"~' "+matlab_nordic)
 os.system("sed -i 's~target~"+directory+output_dir+"~' "+matlab_nordic)
@@ -116,7 +128,8 @@ run_time=datetime.now()
 time_string = run_time.strftime("%d-%m-%Y_%H-%M-%S")
 os.system("matlab -batch " + '"' +"run('"+matlab_nordic+"');exit"+'" > '+
           outhead+"cipactli_nordic_"+time_string+".log")
-### revert change to nordic.m
+print("matlab -batch " + '"' +"run('"+matlab_nordic+"');exit"+'" > '+
+          outhead+"cipactli_nordic_"+time_string+".log")### revert change to nordic.m
 os.system("sed -i 's~"+outhead+"echoes_part-mag_bold_dsd.nii.gz"+"~bold_mag~' "+matlab_nordic)
 os.system("sed -i 's~"+outhead+"echoes_part-phase_bold_dsd.nii.gz"+"~bold_phase~' "+matlab_nordic)
 os.system("sed -i  's~"+file_name+"echoes_part-mag_bold_cipactli"+"~fn_out~' "+matlab_nordic)
