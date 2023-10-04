@@ -13,8 +13,8 @@ because we will search for files ended in rebiased_clean.nii.gz
 #bold_phase_ext="_part-phase_bold"
 #bold_ext="_part-phase_bold"
 #echoes=4
-bids_dir="/bcbl/home/public/MarcoMotion/Habla_restingState/"
-output_dir="func_preproc/"
+#bids_dir="/bcbl/home/public/MarcoMotion/Habla_restingState/"
+#output_dir="func_preproc/"
 #drop_vol=10
 #drop_noise=3
 ####### Arguments #############################################################
@@ -70,9 +70,10 @@ for i in range(len(source_T1)):
               str(dilate) +" -" + str(dilate)+ " -input "  + output_mask[i] +
               " -prefix " + output_mask[i] + " -overwrite" )
 ####### Head mask trasnformation ##############################################    
-source_sbref= sorted([os.path.join(root, x) 
+source_sbref0= sorted([os.path.join(root, x) 
                       for root,dirs,files in os.walk(bids_dir) 
                       for x in files if x.endswith("echo-1_part-mag_sbref.nii.gz")])
+source_sbref=sorted([x for x in source_sbref0 if "func/" in x])
 sbref_names=list(set([directory.partition("func/")[-1]
                         for directory in source_sbref]))
 subjects=sorted(list(set([file.split("_")[0] for file in sbref_names])))
@@ -90,13 +91,18 @@ for subject in subjects:
                   if subject in directory]
     os.chdir([target_mask_out[0].partition(output_dir)[0]+output_dir][0])
     for i in range(len(tasks)):
-        tmp_mask_out=target_mask_out[0]+tasks[i]+"_acq-whead_mask.nii.gz"
+        tmp_mask_out=target_mask_out[0]+tasks[i]+"_echo-1_part-mag_whead_mask.nii.gz"
+        print(tmp_mask_out)
+        #here I changed _acq-whead_mask.nii.gz for _echo-1_part-mag_whead_mask.nii.gz
         tmp_maskAlign_ref=target_mask_out[0]+tasks[i]+"_acq-whead_mask_mcf.aff12.1D"
         os.system("align_epi_anat.py -epi "+ target_sbref[0]+
-                  " -anat "+target_T1[0]+ " -epi_base mean -save_Al_in")
+                  " -anat "+target_T1[0]+ " -epi_base mean -save_Al_in -overwrite")
         os.system("3dAllineate -overwrite -base "+target_sbref[i]+
                   " -final cubic -1Dmatrix_apply "+
-                  subject+"_ses-1_acq-uniclean_T1w_al_mat.aff12.1D"+
+                  target_mask_out[0]+"acq-uniclean_T1w_al_mat.aff12.1D"+
                   " -prefix "+ tmp_mask_out+
                   " "+target_mask[0])
-        os.system("rm *.1D *.BRIK *.HEAD")
+        os.system("mv "+target_mask_out[0]+"acq-uniclean_T1w_al_mat.aff12.1D "+target_mask_out[0]+tasks[i]+"_acq-uniclean_T1w_al_mat.aff12.1D")
+        os.system("mv "+target_mask_out[0]+"acq-uniclean_T1w_al_e2a_only_mat.aff12.1D "+target_mask_out[0]+tasks[i]+"_acq-uniclean_T1w_al_e2a_only_mat.aff12.1D")
+        #os.system("rm *.1D *.BRIK *.HEAD")# This might need to be removed
+
