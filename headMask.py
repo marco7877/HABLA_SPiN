@@ -102,7 +102,8 @@ for subject in subjects:
                   target_mask_out[0]+"acq-uniclean_T1w_al_mat.aff12.1D"+
                   " -prefix "+ tmp_mask_out+
                   " "+target_mask[0])
+        #renaming transformation matrixes
         os.system("mv "+target_mask_out[0]+"acq-uniclean_T1w_al_mat.aff12.1D "+target_mask_out[0]+tasks[i]+"_acq-uniclean_T1w_al_mat.aff12.1D")
         os.system("mv "+target_mask_out[0]+"acq-uniclean_T1w_al_e2a_only_mat.aff12.1D "+target_mask_out[0]+tasks[i]+"_acq-uniclean_T1w_al_e2a_only_mat.aff12.1D")
-        #os.system("rm *.1D *.BRIK *.HEAD")# This might need to be removed
-
+        #Transforming whead mask to the T1 space
+        os.system()
