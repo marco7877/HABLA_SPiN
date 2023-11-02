@@ -34,7 +34,7 @@ for i in range(len(inv2_images)):
     if os.path.split(inv2_images[i])[0] != os.path.split(uni_images[i])[0]:
         raise FileNotFoundError(f"No matching uni image for inv2 image:{inv2_images[i]}")
         
-    os.system(mprageize + " -i " + inv2_images[i] + " -u " + uni_images[i] + " -r 1")
+    os.system(mprageize + " -i " + inv2_images[i] + " -u " + uni_images[i] )
 
     new_name = uni_images[i].replace("acq-uni_", "acq-uniclean_")
     rename_cleaned_images.append(new_name)
