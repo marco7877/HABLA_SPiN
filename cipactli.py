@@ -14,14 +14,18 @@ through os.system("something").
 
 '''
 # DEBUGG
-#matlab_nordic="nordic.m"
-#echo1="/bcbl/home/public/MarcoMotion/Habla_restingState/sub-002/ses-1/func_preproc/sub-002_ses-1_task-HABLA1200_echo-1_part-mag_bold_dsd.nii.gz"
-#output_dir="func_preproc_cipactli/"
-#echoes=4
-#output_dir="func_preproc_cipactli/"
-#repo_directory="/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/"
-#mask="/bcbl/home/public/MarcoMotion/Habla_restingState/sub-002/ses-1/func_preproc/sub-002_ses-1_task-HABLA1200_echo-1_part-mag_brain_mask.nii.gz"
-#TE="11,28, 45, 61"
+'''
+echo1= "/bcbl/home/public/MarcoMotion/Habla_restingState/sub-004/ses-1/func_preproc_cipactli/sub-004_ses-1_task-HABLA1700_echo-1_part-mag_bold_cipactli_dsd.nii.gz"
+source_sbref= "/bcbl/home/public/MarcoMotion/Habla_restingState/sub-004/ses-1/func/sub-004_ses-1_task-HABLA1700_echo-1_part-mag_sbref.nii.gz"
+echoes= 4 
+TE= "13 36 58 81" 
+mask= "/bcbl/home/public/MarcoMotion/Habla_restingState/sub-004/ses-1/func_preproc/sub-004_ses-1_task-HABLA1700_echo-1_part-mag_brain_mask.nii.gz" 
+matlab_nordic= "nordic.m" 
+filt_pattern= "task-HABLA1700"
+output_dir= "func_preproc_cipactli/"
+noise_volumes=3
+repo_directory="/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/"
+'''
 ####### Arguments #############################################################
 parser = argparse.ArgumentParser(
     description="""Cipactli pipeline to remove thermal noise""")
@@ -60,6 +64,11 @@ parser.add_argument("--mask", default=None, type=str,
                     help="""Mask to run tedana, only the filename is needed""")
 parser.add_argument("-phase_filter", default=10, type=str, help="""
 			Temporal phase for nifti_nordic script""")
+parser.add_argument("--noise_volumes", default=0, type=int, help="""
+			Amount of noise volumes to drop, if any""")
+parser.add_argument("--preproc_dir", default="func_preproc_hydra/", type=str, help="""
+			Directory where volumes with noise, but after magnetization dropout locates""")
+
 args = parser.parse_args()
 output_dir=args.output_dir
 matlab_nordic=args.matlab_nordic
@@ -70,7 +79,9 @@ echoes = args.echoes
 mask=args.mask
 TE = args.TE
 repo_directory=args.repo_directory
-# start
+noise_volumes=args.noise_volumes
+preproc_dir=args.preproc_dir
+## start
 parts = echo1.partition("echo-1")
 head,_,mag_tail = zip(parts)
 head="".join(head)
@@ -78,17 +89,18 @@ print(mag_tail)
 mag_tail="".join(mag_tail)
 print(mag_tail)
 phase_tail=mag_tail.replace("part-mag","part-phase")
-outhead=head.replace("func_preproc/",output_dir)
+outhead=head.replace(preproc_dir,output_dir)
 out_name=outhead.partition(output_dir)
 directory_out,_,file_name=zip(out_name)
 file_name="".join(file_name)
 directory_cipactli="".join(directory_out ) + output_dir
-print("dir_cipactli ="+directory_cipactli+"|")
+directory_out="".join(directory_out)
+print("dir_cipactli ="+directory_cipactli)
 directory,_,_=outhead.partition(output_dir)
 if not os.path.exists(directory_cipactli):
     os.mkdir(directory_cipactli)
 #del directory
-mask=mask.partition("func_preproc/")
+mask=mask.partition(preproc_dir)
 mask_dir,_,mask_filename=zip(mask)
 mask_file="".join(mask_filename)
 # make simbolic link of mask 
@@ -107,8 +119,8 @@ for i in range(echoes):
 ## concatenating everything with AFNI
 print(mag_terms)
 print(f'Concatenating {echoes} echoes for nordic denoising')
-os.system("3dZcat "+mag_terms+" -prefix "+outhead+"echoes_part-mag_bold_dsd.nii.gz")
-os.system("3dZcat "+phase_terms+" -prefix "+outhead+"echoes_part-phase_bold_dsd.nii.gz")
+os.system("3dZcat "+mag_terms+" -prefix "+outhead+"echoes_part-mag_bold_dsd.nii.gz -overwrite")
+os.system("3dZcat "+phase_terms+" -prefix "+outhead+"echoes_part-phase_bold_dsd.nii.gz -overwrite")
 
 ####### nordic ################################################################
 ## running nordic over concat niiftis
@@ -118,10 +130,10 @@ matlab_nordic=repo_directory+matlab_nordic
 # TODO: find a better way to call matlab, open to suggestions
 ### do changes to nordic.m
 os.system("sed -i 's~code_directory~"+repo_directory+"~' "+matlab_nordic)
-os.system("sed -i 's~bold_mag~"+outhead+"echoes_part-mag_bold_dsd.nii.gz"+"~' "+matlab_nordic)
-os.system("sed -i 's~bold_phase~"+outhead+"echoes_part-phase_bold_dsd.nii.gz"+"~' "+matlab_nordic)
-os.system("sed -i 's~target~"+directory+output_dir+"~' "+matlab_nordic)
-os.system("sed -i 's~fn_out~"+file_name+"echoes_part-mag_bold_cipactli"+"~' "+matlab_nordic)
+os.system("sed -i 's~BOLD_MAG~"+outhead+"echoes_part-mag_bold_dsd.nii.gz"+"~' "+matlab_nordic)
+os.system("sed -i 's~BOLD_PHASE~"+outhead+"echoes_part-phase_bold_dsd.nii.gz"+"~' "+matlab_nordic)
+os.system("sed -i 's~TARGET~"+directory+output_dir+"~' "+matlab_nordic)
+os.system("sed -i 's~FN_OUT~"+file_name+"echoes_part-mag_bold_cipactli"+"~' "+matlab_nordic)
 print("matlab -batch " + '"' +"run('"+matlab_nordic+"');exit"+'"')
 ### run nordic.m and get time for log output
 run_time=datetime.now()
@@ -130,10 +142,10 @@ os.system("matlab -batch " + '"' +"run('"+matlab_nordic+"');exit"+'" > '+
           outhead+"cipactli_nordic_"+time_string+".log")
 print("matlab -batch " + '"' +"run('"+matlab_nordic+"');exit"+'" > '+
           outhead+"cipactli_nordic_"+time_string+".log")### revert change to nordic.m
-os.system("sed -i 's~"+outhead+"echoes_part-mag_bold_dsd.nii.gz"+"~bold_mag~' "+matlab_nordic)
-os.system("sed -i 's~"+outhead+"echoes_part-phase_bold_dsd.nii.gz"+"~bold_phase~' "+matlab_nordic)
-os.system("sed -i  's~"+file_name+"echoes_part-mag_bold_cipactli"+"~fn_out~' "+matlab_nordic)
-os.system("sed -i  's~"+directory+output_dir+"~target~' "+matlab_nordic)
+os.system("sed -i 's~"+outhead+"echoes_part-mag_bold_dsd.nii.gz"+"~BOLD_MAG~' "+matlab_nordic)
+os.system("sed -i 's~"+outhead+"echoes_part-phase_bold_dsd.nii.gz"+"~BOLD_PHASE~' "+matlab_nordic)
+os.system("sed -i  's~"+file_name+"echoes_part-mag_bold_cipactli"+"~FN_OUT~' "+matlab_nordic)
+os.system("sed -i  's~"+directory+output_dir+"~TARGET~' "+matlab_nordic)
 ## slicing diferent echoes back with AFNI
 #TODO: find the correct name output for cipactli scripts
 z_cipactli=int(check_output("3dinfo -nk "+ outhead+"echoes_part-mag_bold_cipactli"+".nii", shell=True))
@@ -154,21 +166,36 @@ SCL = "n'b"+'\\'
 for character in SCL:
     geom_matrix = geom_matrix.replace(character, '')
 print("Aligning all achoes to the same grid matrix after Z")
+#I am afraid this might not be working because it doent show in 3dinfo
 for i in range(1,echoes):
     os.system("ATR=$(3dAttribute IJK_TO_DICOM_REAL "+ outhead+
                              "echo-1_part-mag_bold_cipactli_dsd.nii.gz) && 3drefit -atrfloat IJK_TO_DICOM_REAL "+
                              '"${ATR}"'+" "+outhead+"echo-"+str(i+1)+"_part-mag_bold_cipactli_dsd.nii.gz")
 ####### realignment ###########################################################
 ### create simbolic link and then use realignment.py
-head_sbref=head.replace("func_preproc/", "func/")
+head_sbref=head.replace(preproc_dir, "func/")
 ref_sbref=head_sbref+"echo-1_part-mag_sbref.nii.gz"
 os.system("ln -s "+ref_sbref+" "+outhead+"echo-1_part-mag_sbref.nii.gz")
 # using realignment.py
 realignment=repo_directory+"realignment.py"
-os.system("python "+ realignment+" --bids_dir "+directory_cipactli+" --echoes "+
-          str(echoes)+ " --output_dir "+output_dir+" --bold_mag_ext _part-mag_bold_cipactli")
+# the bug might be in bids_dir because we are saying func_preproc_cipactli/ directory
+## DONE!! bids_dirs now dir_out 
+# another bug is that the filt pattern must be the task pattern and not the sub one
+## DONE!! filt_pattern CHANGED TO TASK ON CIPACTLY.SH
+# dir_preproc_patter must be func_preproc_cipactli BECAUSE ITS THE OUTPUT OF NORDIC!!!!!!
+## DONE!! dir_preproc_pattern SET TO output_dir
+# noise_volumes is not defined!!!!!
+## DONE!! noise_volumes SET TO 3 ON CIPACTLY.SH
+print("python "+ realignment+" --bids_dir "+directory_out+" --echoes "+
+          str(echoes)+ " --output_dir "+output_dir+" --bold_mag_ext _part-mag_bold_cipactli"+
+          " --nordic False --dir_pattern func/ --dir_preproc_pattern "+output_dir+" --align_matrix_ext hydra_mcf.aff12.1D"+
+          " --filt_pattern "+filt_pattern+" --noise_volumes "+str(noise_volumes))
+#os.system("python "+ realignment+" --bids_dir "+directory_out+" --echoes "+
+ #         str(echoes)+ " --output_dir "+output_dir+" --bold_mag_ext _part-mag_bold_cipactli"+
+  #        " --nordic False --dir_pattern func/ --dir_preproc_pattern "+output_dir+" --align_matrix_ext hydra_mcf.aff12.1D"+
+   #       " --filt_pattern "+filt_pattern+" --noise_volumes "+str(noise_volumes))
 # using tedana
-tedana=repo_directory+"ME-ICA_tedana.py"
-os.system("python "+tedana+ " --bids_dir "+directory_cipactli+" --echoes "+
-          str(echoes)+" --TE "+'"'+TE+'"'+" --output_dir "+output_dir+
-          " --preproc_bold_ext bold_cipactli_mcf_al --mask_ext brain_mask")
+#tedana=repo_directory+"ME-ICA_tedana.py"
+#os.system("python "+tedana+ " --bids_dir "+directory_cipactli+" --echoes "+
+ #         str(echoes)+" --TE "+'"'+TE+'"'+" --output_dir "+output_dir+
+  #        " --preproc_bold_ext bold_cipactli_mcf_al --mask_ext brain_mask")

@@ -12,13 +12,18 @@ First volumes are removed to wait for magnetization stabilization.
 Last volumes are removed because we acquired phase
 '''
 ####### DEBUGG
-#preproc_bold_ext="bold_dsd"
-#echoes=4
-#TE= "11 28 45 61"#1200 
-#bids_dir="/bcbl/home/public/MarcoMotion/Habla_restingState/"
-#output_dir="ME-ICA/"
-#filt_pattern="1200"
+subj="sub-001"
+bids_dir ="/bcbl/home/public/MarcoMotion/Habla_restingState/"+subj+"/ses-1/func_preproc_cipactli/" 
+echoes=4
+TE="13 36 58 81" 
+output_dir= "func_preproc_cipactli/"
+preproc_bold_ext="bold_mcf_al" 
+mask_ext="brain_mask"
+nordic=False
+filt_pattern="task-HABLA1700"
+mask_bids_dir=False
 ####### Arguments #############################################################
+'''
 parser=argparse.ArgumentParser(
         description="Creates a whole head mask from T1 uni-clean")
 parser.add_argument("--echoes", default=None, type=int,
@@ -59,6 +64,7 @@ preproc_bold_ext=args.preproc_bold_ext
 mask_ext=args.mask_ext
 filt_pattern=args.filt_pattern
 nordic=args.nordic
+'''
 ####### Find files ############################################################
 # TODO: check with Cesar if we have to change dsd to another extention as in 
 # Stephanos workflow
@@ -84,7 +90,13 @@ bold_names=list(set([directory.partition(preproc_directory+"/")[-1]
 tasks=sorted(list(set([file.split("_")[2] for file in bold_names])))
 dir_names=list(set([directory.partition(preproc_directory+"/")[0]+output_dir 
            for directory in source_bold]))
-source_mask=sorted([os.path.join(root,x)
+if mask_bids_dir != True:
+    mask_dir=bids_dir.replace(output_dir,"func_preproc/")
+    source_mask=sorted([os.path.join(root,x)
+                    for root,dirs,files in os.walk(mask_dir)
+                    for x in files if x.endswith(mask_ext+".nii.gz")])
+else:
+    source_mask=sorted([os.path.join(root,x)
                     for root,dirs,files in os.walk(bids_dir)
                     for x in files if x.endswith(mask_ext+".nii.gz")])
 ## filter condition
@@ -104,10 +116,14 @@ if len(source_bold) != len(source_mask):
     raise ValueError(f"""Something went wrong, 
                      there are an unequal number of epi images ({len(source_bold)})
                      and number of brain masks ({len(source_mask)})""")
+    print(f"source bold files are: {source_bold}")
+    print(f"brain masks files are: {source_mask}")
 if len(source_bold) != len(dir_names_out):
     raise ValueError(f"""Something went wrong, 
                      there are an unequal number of epi images ({len(source_bold)})
                      and number of output directories ({len(dir_names_out)})""")
+    print(f"source bold files are: {source_bold}")
+    print(f"output files are: {dir_names_out}")
 for i in range(len(source_bold)):
     tmp_echoesfiles=""
     for j in range(echoes):

@@ -1,13 +1,12 @@
 #!/bin/bash -x
 
-for id in $(seq 1 5);
-do
-#id=1
+
+id=$1
 target_dir=ME-ICA_nordic/task-HABLA1200brain_mask/
 bids=/bcbl/home/public/MarcoMotion/Habla_restingState/sub-00${id}/ses-1/
-epi_input=${bids}${target_dir}desc-optcomDenoised_bold.nii.gz
-mask=${bids}func_preproc/sub-00${id}_ses-1_task-HABLA1200_echo-1_part-mag_brain_mask.nii.gz
-mask_ext=brain
+epi_input=$2
+mask=$3
+mask_ext=$4
 epi=${epi_input::-7}
 
 

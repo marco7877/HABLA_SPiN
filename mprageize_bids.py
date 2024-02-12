@@ -40,8 +40,10 @@ for i in range(len(inv2_images)):
     rename_cleaned_images.append(new_name)
     cleaned_jsons.append(new_name.replace(".nii.gz", ".json"))
 
-cleaned_images = sorted([os.path.join(root,x) for root,dirs,files in os.walk("./") for x in files if x.endswith("rebiased_clean.nii.gz")])
-
+#cleaned_images = sorted([os.path.join(root,x) for root,dirs,files in os.walk("./") for x in files if x.endswith("unbiased_clean.nii.gz")])
+cwd=os.getcwd()
+print(f"you are running this script in {cwd}")
+cleaned_images = sorted([f for f in os.listdir("./") if f.endswith("unbiased_clean.nii.gz")])
 if len(cleaned_images) != len(rename_cleaned_images):
     raise ValueError(f"Something went wrong, there are an unequal number of cleaned images ({len(cleaned_images)}) and names to call them ({len(rename_cleaned_images)})")
 if len(uni_jsons) != len(cleaned_jsons):

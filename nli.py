@@ -70,7 +70,10 @@ for directory in directories:
                    if directory in root])
 	source_oc_all.extend(source_oc)
 	source_tsnr_all.extend(source_tsnr)
-	tmp_preprocessing_methods=[directory]*len(source_oc)
+	if directory == "func_preproc_cipactli":
+		tmp_preprocessing_methods=["ME-ICA_HYDRA"]*len(source_oc)
+	else:
+		tmp_preprocessing_methods=[directory]*len(source_oc)
 	preprocessing_method.extend(tmp_preprocessing_methods)	
 ######
 # Reading dataset
@@ -129,8 +132,8 @@ for i in range (len(source_oc_all)):
     mean_masked_oc=np.mean(zmasked_oc,axis=0)
 
 #replacing masked values with nan 
-    mean_masked_oc=mean_masked_oc.filled(np.nan)
-    zmasked_tsnr=zmasked_tsnr.filled(np.nan)
+    mean_masked_oc=mean_masked_oc.filled(np.NaN)
+    zmasked_tsnr=zmasked_tsnr.filled(np.NaN)
 	
 
 ######
@@ -162,27 +165,24 @@ for i in range (len(source_oc_all)):
 # plotnine_obj.draw() #plot inline
 # plotnine_obj.save(filename='dir/dir/img.png',dpi=300)
 df_oc_masked=pd.DataFrame(data=data_oc_masked, columns=["value","prop","ID","method"])
-df_oc_masked=df_oc_masked.dropna()
-plotnine_obj=ggplot(df_oc_masked,aes(x="method",y="value",fill="ID"))+geom_boxplot()
-plotnine_obj+theme(
-        panel_background=element_rect(fill="white", colour="gray",size=0.5,linetype="solid"),
-        panel_grid_major=element_line(size=0.5, linetype="solid",colour="white"),
-        panel_grid_minor=element_line(size=0.25, linetype="solid",colour="white"),
-        axis_text=element_text(size=15))
-plotnine_obj.draw()
-plotnine_obj.save(filename="oc_masked_group.png",dpi=400)
+df_oc_masked['value']=pd.to_numeric(df_oc_masked['value'], errors='coerce')
+df_oc_masked_plot=df_oc_masked.dropna()
+df_tsnr=pd.DataFrame(data=zdata_tsnr_masked, columns=["value","ID","method"])
+df_tsnr['value']=pd.to_numeric(df_tsnr['value'], errors='coerce')
+df_tsnr_plot=df_tsnr.dropna()
+
+df_oc_masked_plot.to_csv(bids_dir+"OC_dataframe_GM_group.csv",index=False)
+df_tsnr_plot.to_csv(bids_dir+"tsnr_dataframe_GM_group.csv",index=False)
+
+####
+plotnine_oc=(ggplot(df_oc_masked_plot,aes(x="method",y="value",fill="ID"))+geom_boxplot())
+#plotnine_oc.draw()
+plotnine_oc.save(bids_dir+"oc_masked_GM_group.png", verbose=False)
 
 ## plot 2
-df_tsnr=pd.DataFrame(data=zdata_tsnr_masked, columns=["value","ID","method"])
-df_tsnr=df_tsnr.dropna()
-plotnine_obj=ggplot(df_tsnr,aes(x="method",y="value",fill="ID"))+geom_boxplot()
-plotnine_obj+theme(
-        panel_background=element_rect(fill="white", colour="gray",size=0.5,linetype="solid"),
-        panel_grid_major=element_line(size=0.5, linetype="solid",colour="white"),
-        panel_grid_minor=element_line(size=0.25, linetype="solid",colour="white"),
-        axis_text=element_text(size=15))
-plotnine_obj.draw()
-plotnine_obj.save(filename="tsnr_masked_group.png",dpi=400)
+plotnine_tsnr=(ggplot(df_tsnr_plot,aes(x="method",y="value",fill="ID"))+geom_boxplot())
+#plotnine_tsnr.draw()
+plotnine_tsnr.save(bids_dir+"tsnr_masked_GM_group.png", verbose=False)
 
 
 ######
