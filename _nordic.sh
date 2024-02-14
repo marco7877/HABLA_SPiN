@@ -34,8 +34,11 @@ do
 	mkdir $output/tmp
 
 	echo "I have original $volumes  volumes but after removing noise we have: $vol"
+	
+	
+	list_echoes=$( count -digits 1 1 4 )
 
-	for n_echo in {1..4}
+	for n_echo in ${list_echoes}
 	do
 
 		temp_nordic=$(mktemp $output/tmp/nordicXXXXXX.m)
