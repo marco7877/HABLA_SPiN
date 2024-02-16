@@ -8,15 +8,13 @@ module load afni/latest
 module load matlab/R2021B
 module load fsl/6.0.3
 
-method=hydra
+method=ME
 preproc=func_preproc_${method}
-subj=sub-005
+subj=sub-002
 repo=/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/
 origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
 output=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
 input=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/func
-magnetization=10
-noise=0
 echoes=4
 
 # MAIN
@@ -43,7 +41,8 @@ do
 
 	fi 
 
-
+#TODO. Add indentation with | to split loong commands
+#  Make variables more clean. let only the extension after variable, i.e., ${output_mcf}_al-nii.gz
 	3dvolreg -overwrite -Fourier -base ${sbref} -1Dfile  ${output}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf.1D -1Dmatrix_save ${output}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf.aff12.1D -prefix ${output}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf.nii.gz ${part_mag}
 	1d_tool.py -infile ${output}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf.1D -demean -write ${output}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf_demean.1D -overwrite
 	1d_tool.py -infile ${output}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf_demean.1D -derivative -demean -write ${output}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf_deriv1.1D -overwrite
@@ -54,8 +53,9 @@ do
 	for n_echoe in $list_echoes
 	do
 
-	part_mag=${origin}/${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz
+		part_mag=${origin}/${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz
 
-        3dAllineate -overwrite -base ${sbref} -final cubic -1Dmatrix_apply ${output}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf.aff12.1D -prefix ${output}/${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_mcf_al.nii.gz ${part_mag}
+        	3dAllineate -overwrite -base ${sbref} -final cubic -1Dmatrix_apply ${output}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf.aff12.1D -prefix ${output}/${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_mcf_al.nii.gz ${part_mag}
+
 	done
 done

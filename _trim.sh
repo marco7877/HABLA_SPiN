@@ -8,7 +8,7 @@ module load afni/latest
 
 method=hydra
 preproc=func_preproc_${method}/
-subj=sub-001
+subj=sub-005
 bids=/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/
 repo=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}
 origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/func/

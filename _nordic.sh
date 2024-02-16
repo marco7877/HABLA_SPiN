@@ -9,12 +9,11 @@ module load matlab/R2021B
 
 method=nordic
 preproc=func_preproc_${method}
-subj=sub-005
+subj=sub-002
 repo=/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/
 origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
 output=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
-magnetization=10
-noise=0
+noise=3
 
 # MAIN
 if [[ ! -e ${output} ]]; then
@@ -26,14 +25,8 @@ fi
 for task in task-HABLA1200 task-HABLA1700
 do
 
-	volumes=$(3dinfo -nvi ${origin}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_dsd.nii.gz)
-
-	echo 3dinfo -nvi ${origin}/${subj}_ses-1_${task}_echo-1_part-mag_bold${method}_dsd.nii.gz
-
-	vol=$(($volumes-$noise))
 	mkdir $output/tmp
 
-	echo "I have original $volumes  volumes but after removing noise we have: $vol"
 	
 	
 	list_echoes=$( count -digits 1 1 4 )
@@ -56,8 +49,27 @@ do
 		echo "Thermal denoising with NORDIC:  ID ${subj}"
 
 		matlab -batch "run('$temp_nordic');exit" 
-
+		
 	done
 	rm -rf $output/tmp
 
+	part_mag=${output}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_dsd
+	
+	volumes=$(3dinfo -nvi ${part_mag}.nii)
+
+	echo "3dinfo -nvi ${part_mag}.nii"
+
+	vol=$(($volumes-$noise))
+	
+	echo "I have original $volumes  volumes but after removing noise we have: $vol"
+
+	for n_echo in ${list_echoes}
+	do
+		part_mag=${output}/${subj}_ses-1_${task}_echo-${n_echo}_part-mag_bold_${method}_dsd
+		
+		echo "removing noise to ${part_mag}.nii"
+
+		3dcalc -a ${part_mag}.nii[0..${vol}] -expr 'a' -prefix ${part_mag}.nii.gz -overwrite
+
+	done
 done

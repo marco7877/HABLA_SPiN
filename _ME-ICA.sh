@@ -14,11 +14,11 @@ module load python/venv
 source activate /bcbl/home/home_g-m/mflores/conda_envs/tedana
 
 
-method=hydra
+method=ME
 preproc=func_preproc_${method}
-subj=sub-001
+subj=sub-002
 input=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
-origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/func_preproc
+origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/func_preproc_ME
 echoes=4
 echo_times="13 36 58 81"
 task=task-HABLA1700
@@ -41,7 +41,7 @@ echo "My reference part_mag is: ${part_mag}"
 
 mask=${origin}/${subj}_ses-1_${task}_echo-1_part-mag_brain_mask.nii.gz
 
-echo "My reference mask is: ${part_mag}"
+echo "My reference mask is: ${mask}"
 # make a list from 1 to 4 with 1 length digits
 
 list_echoes=$( count -digits 1 2 4 )

@@ -26,7 +26,7 @@ parser.add_argument("--bids_dir", default=None, type=str,
                     help="Full path to the BIDS directory ")
 parser.add_argument("--dilate", default=3,type=int,
                     help="Dilation size to close holes within head mask")
-parser.add_argument("--output_dir",default="func_preproc/", type =str,
+parser.add_argument("--output_dir",default="func_preproc_ME/", type =str,
                     help ="""Directory to store output at.
                     Default is func_preproc:
                         -anat
