@@ -16,7 +16,7 @@ output=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
 magnetization=10
 noise=0
 echoes=4
-task=task-HABLA1200
+task=task-HABLA1700
 
 # MAIN
 
