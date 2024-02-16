@@ -16,7 +16,7 @@ source activate /bcbl/home/home_g-m/mflores/conda_envs/tedana
 
 method=ME
 preproc=func_preproc_${method}
-subj=sub-002
+subj=sub-003
 input=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
 origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/func_preproc_ME
 echoes=4
@@ -27,13 +27,13 @@ task=task-HABLA1700
 
 #Check if output durectory exists
 
+
+output=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}/${task}
 if [[ ! -e ${output} ]]; then
 
 	mkdir ${output}
 
 fi
-
-
 # Reference original volumnes
 part_mag=${input}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf_al.nii.gz
 
@@ -57,4 +57,4 @@ do
 	part_mag=$mag
 done
 
-tedana -d ${mag} -e ${echo_times} --out-dir ${input} --mask ${mask} --overwrite
+tedana -d ${mag} -e ${echo_times} --out-dir ${output} --mask ${mask} --overwrite

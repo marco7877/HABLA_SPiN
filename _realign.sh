@@ -10,7 +10,7 @@ module load fsl/6.0.3
 
 method=ME
 preproc=func_preproc_${method}
-subj=sub-002
+subj=sub-001
 repo=/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/
 origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
 output=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}

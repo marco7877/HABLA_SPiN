@@ -9,7 +9,7 @@ module load matlab/R2021B
 
 method=hydra
 preproc=func_preproc_${method}
-subj=sub-002
+subj=sub-003
 repo=/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/
 origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
 output=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
