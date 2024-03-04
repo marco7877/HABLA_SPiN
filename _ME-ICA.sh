@@ -14,9 +14,9 @@ module load python/venv
 source activate /bcbl/home/home_g-m/mflores/conda_envs/tedana
 
 
-method=ME
+method=nordic
 preproc=func_preproc_${method}
-subj=sub-003
+subj=sub-004
 input=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
 origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/func_preproc_ME
 echoes=4

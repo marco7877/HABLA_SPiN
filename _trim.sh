@@ -6,9 +6,9 @@
 
 module load afni/latest
 
-method=hydra
+method=ME
 preproc=func_preproc_${method}/
-subj=sub-005
+subj=sub-001
 bids=/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/
 repo=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}
 origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/func/
@@ -44,7 +44,7 @@ for n_echo in ${list_echoes}
 do
 	echo "Trimming subject ${subj} nifti ${origin}${subj}_ses-1_${task}_echo-${n_echo}_${parts}_bold.nii.gz[${magnetization}..${vol}]"
 
-	3dcalc -a ${origin}${subj}_ses-1_${task}_echo-${n_echo}_${parts}_bold.nii.gz[${magnetization}..${vol}] -expr 'a' -prefix ${output}${subj}_ses-1_${task}_echo-${n_echo}_${parts}_bold_${method}_dsd.nii.gz -overwrite
+	3dcalc -a ${origin}${subj}_ses-1_${task}_echo-${n_echo}_${parts}_bold.nii.gz[${magnetization}..${vol}] -expr 'a' -prefix ${output}${subj}_ses-1_${task}_echo-${n_echo}_${parts}_bold_${method}_thrm_dsd.nii.gz -overwrite
 
 
 
