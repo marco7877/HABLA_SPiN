@@ -13,7 +13,7 @@ n_sub=$2
 subj=sub-00${n_sub}
 repo=/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/
 origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
-output=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
+output=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}/
 magnetization=10
 noise=$3
 echoes=4
@@ -31,6 +31,7 @@ fi
 
 for task in task-HABLA1200 task-HABLA1700
 do
+		echo "*************************************************************"
 # Reference original volumnes
 	part_mag=${origin}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_thrm_dsd.nii.gz
 
@@ -40,13 +41,13 @@ do
 
 	echo "My reference part_phase is: ${part_phase}"
 
-	if [[ ! -e ${output}/tmp  ]]; then
+	if [[ ! -e ${output}tmp  ]]; then
 
-		mkdir ${output}/tmp
+		mkdir ${output}tmp
 
 	fi 
 
-	temp_nordic=$(mktemp $output/tmp/nordicXXXXXX.m)
+	temp_nordic=$(mktemp ${output}tmp/nordicXXXXXX.m)
 
 # make a list from 1 to 4 with 1 length digits
 
@@ -72,16 +73,16 @@ do
 	echo "Magnitude volumes to concatenate are: $part_mag"
 
 	echo "Phase volumes to concatenate are: $part_phase"
+	3dZcat $part_mag -prefix ${output}${subj}_ses-1_${task}_echoes_part-mag_bold_${method}_dsd.nii.gz -overwrite
+	
+	3dZcat $part_phase -prefix ${output}${subj}_ses-1_${task}_echoes_part-phase_bold_${method}_dsd.nii.gz -overwrite
 
-	3dZcat $part_mag -prefix $output/${subj}_ses-1_${task}_echoes_part-mag_bold_${method}_dsd.nii.gz -overwrite
-
-	3dZcat $part_phase -prefix $output/${subj}_ses-1_${task}_echoes_part-phase_bold_${method}_dsd.nii.gz -overwrite
-
-	echo "addpath(genpath('/bcbl/home/public/MarcoMotion/toolboxes/')); cd '${repo}'; ARG.temporal_phase=1; ARG.phase_filter_width=10; ARG.save_add_info=1; ARG.DIROUT='${output}'; ARG.noise_volume_last=3; NIFTI_NORDIC ('$output/${subj}_ses-1_${task}_echoes_part-mag_bold_${method}_dsd.nii.gz','$output/${subj}_ses-1_${task}_echoes_part-phase_bold_${method}_dsd.nii.gz','$output/${subj}_ses-1_${task}_echoes_part-mag_bold_${method}_dsd',ARG)" > $temp_nordic
+		echo "*************************************************************"
+	echo "addpath(genpath('/bcbl/home/public/MarcoMotion/toolboxes/'));cd '${repo}';ARG.temporal_phase=1;ARG.noise_volume_last=${noise};ARG.phase_filter_width=10;ARG.save_add_info=1;ARG.DIROUT='${output}';NIFTI_NORDIC('${output}${subj}_ses-1_${task}_echoes_part-mag_bold_${method}_dsd.nii.gz','${output}${subj}_ses-1_${task}_echoes_part-phase_bold_${method}_dsd.nii.gz','${subj}_ses-1_${task}_echoes_part-mag_bold_${method}_dsd',ARG);" > $temp_nordic
 
 	matlab -batch "run('$temp_nordic');exit" 
 
-	z_hydra=$(3dinfo -nk $output/${subj}_ses-1_${task}_echoes_part-phase_bold_${method}_dsd.nii 
+	z_hydra=$(3dinfo -nk ${output}${subj}_ses-1_${task}_echoes_part-phase_bold_${method}_dsd.nii 
 )
 
 	z_orig=$(3dinfo -nk ${origin}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_thrm_dsd.nii.gz
@@ -96,7 +97,11 @@ do
 
 	do
 
-		3dZcutup -prefix ${output}/${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz -keep ${start} ${finish} -overwrite
+		echo "*************************************************************"
+		echo "3dZcutup -prefix ${output}${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz -keep ${start} ${finish} ${output}${subj}_ses-1_${task}_echoes_part-mag_bold_${method}_dsd.nii -overwrite"
+
+		3dZcutup -prefix ${output}${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz -keep ${start} ${finish} ${output}${subj}_ses-1_${task}_echoes_part-mag_bold_${method}_dsd.nii -overwrite
+
 
 		start=$(($start+$z_orig))
 
@@ -115,14 +120,14 @@ do
 
 	do
 
-		3drefit -atrfloat IJK_TO_DICOM_REAL ${ATR} ${output}/${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz
+		3drefit -atrfloat IJK_TO_DICOM_REAL ${ATR} ${output}${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz
 
 # Removing last noise volumes
 
 		echo "removing noise to ${output}/${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz"
 	
-		3dcalc -a ${output}/${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz[0..${vol}] -expr 'a' -prefix ${output}/${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz -overwrite
+		3dcalc -a ${output}${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz[0..${vol}] -expr 'a' -prefix ${output}${subj}_ses-1_${task}_echo-${n_echoe}_part-mag_bold_${method}_dsd.nii.gz -overwrite
 
 	done
 done
-rm -rf $output/tmp
+rm -rf ${output}tmp
