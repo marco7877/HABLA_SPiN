@@ -25,7 +25,7 @@ for n_sub in ${list_subj}
 do
 	error_txt=/bcbl/home/home_g-m/mflores/ips_logs/sub${n_sub}_${method}.txt
 
-	if [[ ! -e ${error_txt} ]]; then
+	if [[ -e ${error_txt} ]]; then
 
 		rm ${error_txt}
 

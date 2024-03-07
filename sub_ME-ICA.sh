@@ -7,7 +7,6 @@
 
 
 method=hydra
-me=true
 # MAIN
 
 #Check if output durectory exists
@@ -22,12 +21,12 @@ echo "List of echoes is ${list_subj}"
 for n_sub in ${list_subj}
 
 do
-	error_txt=/bcbl/home/home_g-m/mflores/ips_logs/sub${n_sub}_${method}_realign.txt
+	error_txt=/bcbl/home/home_g-m/mflores/ips_logs/sub${n_sub}_${method}_OC.txt
 
 	if [[ -e ${error_txt} ]]; then
 
 		rm ${error_txt}
 
 	fi
-	qsub -q short.q -N sub${n_sub}_${method}_realign -o ${error_txt} -e ${error_txt} /bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/_realign.sh ${method} ${n_sub} ${me}
+	qsub -q short.q -N sub${n_sub}_${method}_OC -o ${error_txt} -e ${error_txt} /bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/_ME-ICA.sh ${method} ${n_sub}
 done
