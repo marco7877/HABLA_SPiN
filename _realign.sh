@@ -11,13 +11,13 @@ module load fsl/6.0.3
 method=$1
 preproc=func_preproc_${method}
 n_subj=$2
+me=$3
 subj=sub-00${n_subj}
 repo=/bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/
 origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
 output=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
 input=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/func
 echoes=4
-me=true
 
 if  [ "$me" == true ]
 then
