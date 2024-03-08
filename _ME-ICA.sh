@@ -21,7 +21,7 @@ preproc=func_preproc_${method}
 sub=$2
 subj=sub-00${sub}
 input=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
-origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/${preproc}
+origin=/bcbl/home/public/MarcoMotion/Habla_restingState/${subj}/ses-1/func_preproc_
 echoes=4
 
 # MAIN
@@ -49,7 +49,7 @@ do
 		part_mag=${input}/${subj}_ses-1_${task}_echo-1_part-mag_bold_${method}_mcf_al.nii.gz
 
 		echo "My reference part_mag is: ${part_mag}"
-
+mask_source=
 		mask=${origin}/${subj}_ses-1_${task}_echo-1_part-mag_brain_mask.nii.gz
 
 		echo "My reference mask is: ${mask}"
