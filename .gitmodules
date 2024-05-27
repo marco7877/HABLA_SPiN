@@ -1,0 +1,3 @@
+[submodule "spin-lab-me-fmriprep-pipeline"]
+	path = spin-lab-me-fmriprep-pipeline
+	url = https://github.com/SPiN-Lab/spin-lab-me-fmriprep-pipeline
