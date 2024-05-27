@@ -6,8 +6,8 @@
 
 module load afni/stable
 
-method=hydra
-noise=3
+method=snake
+noise=12
 
 # MAIN
 
@@ -25,14 +25,14 @@ for n_sub in ${list_subj}
 do
 	for task in task-HABLA1700 task-HABLA1200
 	do
-	error_txt=/bcbl/home/home_g-m/mflores/ips_logs/sub${n_sub}_${method}_${task}.txt
+	error_txt=/bcbl/home/public/MarcoMotion/logfiles/sub${n_sub}_${method}_${task}_snake.txt
 
 	if [[ -e ${error_txt} ]]; then
 
 		rm ${error_txt}
 
 	fi
-	qsub -q short.q -N sub${n_sub}_${method}_${task} -o ${error_txt} -e ${error_txt} /bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/_hydra.sh ${method} ${n_sub} ${noise} ${task}
+	qsub -q short.q -N sub${n_sub}_${method}Nordic_${task} -o ${error_txt} -e ${error_txt} /bcbl/home/public/MarcoMotion/scripts/HABLA_SPiN/_snake.sh ${method} ${n_sub} ${noise} ${task}
 
 done
 done
