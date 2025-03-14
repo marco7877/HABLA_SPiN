@@ -1,2 +1,3 @@
 # HABLA_SPiN
-Scripts for processing and proposing a new  multiecho fMRI denoising technique. 
+
+Scripts I've been using during my PhD journey. Caution is adviced
